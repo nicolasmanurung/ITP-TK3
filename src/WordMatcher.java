@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 public class WordMatcher {
     private HashMap<String, Integer> correctAnswerLevel = new HashMap<>();
+
     private ArrayList<String> userAnswers = new ArrayList<>();
-    private String tempUserAnswers = "";
 
     private Integer currentLevelScore = 0;
 
