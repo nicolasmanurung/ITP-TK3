@@ -1,119 +1,153 @@
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Scanner;
+
 
 public class Main {
     public static void main(String[] args) {
-        HashMap<String, Integer> correctAnswerLevel1 = new HashMap<>();
-        ArrayList<String> level1UserAnswers = new ArrayList<>();
-        ArrayList<String> level2UserAnswers = new ArrayList<>();
-        ArrayList<String> level3UserAnswers = new ArrayList<>();
-
-        Integer counterCorrectAttemp = 0;
-        Integer currentLevelScore = 0;
-        Integer globalScore = 0;
-
-//        set correct answers level 1
-        correctAnswerLevel1.put("tie", 40);
-        correctAnswerLevel1.put("die", 40);
-        correctAnswerLevel1.put("dude", 10);
-
         String isUserWantToRetry = "Y";
-
+        Integer globalSumScore = 0;
         while (isUserWantToRetry.equals("Y")) {
-            globalScore = 0;
-            boolean isLevel1Pass = false;
-            boolean isLevel2Pass = false;
-
-            //level 1
-            // currentLevelScore > 70 = exit ke level selanjutnya
-            // counterAttemp == 10 = exit program
-            level1UserAnswers.clear();
-            counterCorrectAttemp = 0;
-            for (int i = 0; i < 3; i++) {
-                // user dimintain inputan
-                Scanner input = new Scanner(System.in);
-                String inputanUser = input.nextLine().toLowerCase(Locale.ROOT);
-
-                // validasi apakah jawaban user >=3 && <=6
-                if (validateLengthAnswers(inputanUser)) {
-                    // validasi apakah jawaban user ada di jawaban yang benar & belum pernah di input sebelumnya
-                    if (correctAnswerLevel1.get(inputanUser) != null && !level1UserAnswers.contains(inputanUser)) {
-                        level1UserAnswers.add(inputanUser);
-                        currentLevelScore += correctAnswerLevel1.get(inputanUser);
-                        globalScore += correctAnswerLevel1.get(inputanUser);
-                        System.out.println(correctAnswerLevel1.get(inputanUser));
-
-                        counterCorrectAttemp++;
-                    } else {
-                        if (!level1UserAnswers.contains(inputanUser)) {
-                            level1UserAnswers.add(inputanUser);
-                        }
-                    }
-                } else {
-                    level1UserAnswers.add(inputanUser);
-                }
-            }
-
-            // print semua score
-            System.out.print("Level 1 berhasil =>" + level1UserAnswers);
-
-            // bisa ke level selanjutnya atau engga
-
-            if (currentLevelScore <= 70) {
-                System.out.print("Anda ingin mengulang [y/t] ");
+            globalSumScore = 0;
+            // Level 1
+            WordMatcher firstLevel = new WordMatcher();
+            firstLevel.setCorrectAnswer(getFirstLevelCorrectAnswers());
+            System.out.print("Level 1\n");
+            System.out.print("d     e       t       t       l       i\n");
+            firstLevel.operateLevel();
+            if (firstLevel.isThisLevelPass()) {
+                globalSumScore += firstLevel.getCurrentLevelScore();
+                System.out.printf("You had answered 10 times with %d right answers\n\n", firstLevel.getCounterCorrectAttemp());
+            } else {
+                System.out.print("You Lose!! Try Again..\n");
+                System.out.print("Do you want to retry [y/t] ");
                 Scanner wantToRetryScanner = new Scanner(System.in);
                 isUserWantToRetry = wantToRetryScanner.nextLine().toUpperCase(Locale.ROOT);
-            } else {
-                if (currentLevelScore >= 70) {
-                    isLevel1Pass = true;
-                }
+            }
+
+            // Level 2
+            WordMatcher secondLevel = new WordMatcher();
+            if (firstLevel.isThisLevelPass()) {
+                secondLevel.setCorrectAnswer(getSecondLevelCorrectAnswers());
+                System.out.print("Level 2\n");
+                System.out.print("d     e       t       t       l       i\n");
+                secondLevel.operateLevel();
+                System.out.printf("You had answered 10 times with %d right answers\n\n", secondLevel.getCounterCorrectAttemp());
+            }
+            if (isUserWantToRetry.equals("Y") && firstLevel.isThisLevelPass() && !secondLevel.isThisLevelPass()) {
+                System.out.print("You Lose!! Try Again..\n");
+                System.out.print("Do you want to retry [y/t] ");
+                Scanner wantToRetryScanner = new Scanner(System.in);
+                isUserWantToRetry = wantToRetryScanner.nextLine().toUpperCase(Locale.ROOT);
             }
 
 
-            // validasi level 2
-            if (isLevel1Pass) {
-                currentLevelScore = 0;
-                level2UserAnswers.clear();
-                counterCorrectAttemp = 0;
-
-                System.out.print("Eksekusi Level 2 =>");
-                //for nya disini
-
-                if (currentLevelScore >= 70) {
-                    //print hasilnya disini
-                    // kasih tau counterCorrectAttemp dan currentLevelScore
-                    isLevel2Pass = true;
-                } else {
-                    System.out.print("Anda ingin mengulang [y/t] ");
-                    Scanner wantToRetryScanner = new Scanner(System.in);
-                    isUserWantToRetry = wantToRetryScanner.nextLine().toUpperCase(Locale.ROOT);
-                }
+            //Level 3, idem
+            WordMatcher thirdLevel = new WordMatcher();
+            if (secondLevel.isThisLevelPass()) {
+                globalSumScore += secondLevel.getCurrentLevelScore();
+                thirdLevel.setCorrectAnswer(getThirdLevelCorrectAnswers());
+                System.out.print("Level 3\n");
+                System.out.print("d     e       t       t       l       i\n");
+                thirdLevel.operateLevel();
+                System.out.printf("You had answered 10 times with %d right answers\n\n", thirdLevel.getCounterCorrectAttemp());
+            }
+            if (!isUserWantToRetry.equals("Y") && firstLevel.isThisLevelPass() && secondLevel.isThisLevelPass() && !thirdLevel.isThisLevelPass()) {
+                System.out.print("You Lose!! Try Again..\n");
+                System.out.print("Do you want to retry [y/t] ");
+                Scanner wantToRetryScanner = new Scanner(System.in);
+                isUserWantToRetry = wantToRetryScanner.nextLine().toUpperCase(Locale.ROOT);
             }
 
+            if (thirdLevel.isThisLevelPass()) {
+                globalSumScore += thirdLevel.getCurrentLevelScore();
+                System.out.print("Overall score : %d\n" + globalSumScore);
+                System.out.print("You WIN!!");
 
-            // validasi level 3
-            if (isLevel2Pass) {
-                currentLevelScore = 0;
-                level3UserAnswers.clear();
-                counterCorrectAttemp = 0;
-
-                System.out.print("Eksekusi Level 3 =>");
-                //for nya disini
-
-                if (currentLevelScore <= 70) {
-                    System.out.print("Anda ingin mengulang [y/t] ");
-                    Scanner wantToRetryScanner = new Scanner(System.in);
-                    isUserWantToRetry = wantToRetryScanner.nextLine().toUpperCase(Locale.ROOT);
-                } else {
-                    // print semua hasil dari level 1 - 3
-                    // print globalScore
-
-                    return;
-                }
+                // set exit program
+                isUserWantToRetry = "N";
             }
         }
     }
 
-    static boolean validateLengthAnswers(String keyword) {
-        return keyword.length() >= 3 && keyword.length() <= 26;
+    private static HashMap<String, Integer> getFirstLevelCorrectAnswers() {
+        HashMap<String, Integer> listCorrectAnswers = new HashMap<>();
+        listCorrectAnswers.put("die", 10);
+        listCorrectAnswers.put("led", 10);
+        listCorrectAnswers.put("lei", 10);
+        listCorrectAnswers.put("let", 10);
+        listCorrectAnswers.put("lid", 10);
+        listCorrectAnswers.put("lit", 10);
+        listCorrectAnswers.put("tie", 10);
+        listCorrectAnswers.put("deli", 10);
+        listCorrectAnswers.put("diet", 10);
+        listCorrectAnswers.put("edit", 10);
+        listCorrectAnswers.put("idle", 10);
+        listCorrectAnswers.put("lied", 10);
+        listCorrectAnswers.put("tide", 10);
+        listCorrectAnswers.put("tied", 10);
+        listCorrectAnswers.put("tile", 10);
+        listCorrectAnswers.put("tilt", 10);
+        listCorrectAnswers.put("tilde", 10);
+        listCorrectAnswers.put("tiled", 10);
+        listCorrectAnswers.put("title", 10);
+        listCorrectAnswers.put("tilted", 10);
+        listCorrectAnswers.put("titled", 10);
+
+        return listCorrectAnswers;
+    }
+
+    private static HashMap<String, Integer> getSecondLevelCorrectAnswers() {
+        HashMap<String, Integer> listCorrectAnswers = new HashMap<>();
+        listCorrectAnswers.put("die", 10);
+        listCorrectAnswers.put("led", 10);
+        listCorrectAnswers.put("lei", 10);
+        listCorrectAnswers.put("let", 10);
+        listCorrectAnswers.put("lid", 10);
+        listCorrectAnswers.put("lit", 10);
+        listCorrectAnswers.put("tie", 10);
+        listCorrectAnswers.put("deli", 10);
+        listCorrectAnswers.put("diet", 10);
+        listCorrectAnswers.put("edit", 10);
+        listCorrectAnswers.put("idle", 10);
+        listCorrectAnswers.put("lied", 10);
+        listCorrectAnswers.put("tide", 10);
+        listCorrectAnswers.put("tied", 10);
+        listCorrectAnswers.put("tile", 10);
+        listCorrectAnswers.put("tilt", 10);
+        listCorrectAnswers.put("tilde", 10);
+        listCorrectAnswers.put("tiled", 10);
+        listCorrectAnswers.put("title", 10);
+        listCorrectAnswers.put("tilted", 10);
+        listCorrectAnswers.put("titled", 10);
+
+        return listCorrectAnswers;
+    }
+
+    private static HashMap<String, Integer> getThirdLevelCorrectAnswers() {
+        HashMap<String, Integer> listCorrectAnswers = new HashMap<>();
+        listCorrectAnswers.put("die", 10);
+        listCorrectAnswers.put("led", 10);
+        listCorrectAnswers.put("lei", 10);
+        listCorrectAnswers.put("let", 10);
+        listCorrectAnswers.put("lid", 10);
+        listCorrectAnswers.put("lit", 10);
+        listCorrectAnswers.put("tie", 10);
+        listCorrectAnswers.put("deli", 10);
+        listCorrectAnswers.put("diet", 10);
+        listCorrectAnswers.put("edit", 10);
+        listCorrectAnswers.put("idle", 10);
+        listCorrectAnswers.put("lied", 10);
+        listCorrectAnswers.put("tide", 10);
+        listCorrectAnswers.put("tied", 10);
+        listCorrectAnswers.put("tile", 10);
+        listCorrectAnswers.put("tilt", 10);
+        listCorrectAnswers.put("tilde", 10);
+        listCorrectAnswers.put("tiled", 10);
+        listCorrectAnswers.put("title", 10);
+        listCorrectAnswers.put("tilted", 10);
+        listCorrectAnswers.put("titled", 10);
+
+        return listCorrectAnswers;
     }
 }
